@@ -1,8 +1,6 @@
-from locale import currency
+from fastapi import Path, Body, Query, APIRouter
 
-from fastapi import Path, Body
-
-from src.helper.main import app
+router = APIRouter(prefix="/currency", tags=["Валюта"])
 
 fake_currencies = [
     {"id": 1, "name": "USD", "unit": 123.00},
@@ -18,28 +16,28 @@ fake_currencies = [
 ]
 
 
-@app.get("/currencies",
-         status_code=200,
-         summary="Список валют", )
+@router.get("/currencies",
+            status_code=200,
+            summary="Список валют", )
 def get_currencies():
     return {"status": "ok", "data": fake_currencies}
 
 
-@app.get("/currencies/{currency_id}",
-         status_code=200,
-         summary="Выбор волюты")
+@router.get("/{currency_id}",
+            status_code=200,
+            summary="Выбор волюты")
 def get_currency_id(currency_id: int = Path(description="id валюты")):
     currency = [currency for currency in fake_currencies if currency["id"] == currency_id][0]
 
     return {"status": "ok", "data": currency}
 
 
-@app.post("/currencies/{currency_id}",
-          status_code=201,
-          summary="Дабавление новой записи валюты")
+@router.post("/{currency_id}",
+             status_code=201,
+             summary="Дабавление новой записи валюты")
 def add_currency(currency_id: int = Path(description="id валюты"),
-                 name: str = Body(description="Название валюты"),
-                 unit: float = Body(description="Единица")):
+                 name: str = Query(str, description="Название валюты"),
+                 unit: float = Query(float, description="Единица")):
     currency = [
         {"id": currency_id, "name": name, "unit": unit}
     ]
@@ -47,12 +45,12 @@ def add_currency(currency_id: int = Path(description="id валюты"),
     return {"status": "ok", "data": fake_currencies + currency}
 
 
-@app.patch("/currencies/{currency_id}",
-           status_code=200,
-           summary="Изменение данные валюты")
+@router.patch("/{currency_id}",
+              status_code=200,
+              summary="Изменение данные валюты")
 def update_currency(currency_id: int = Path(description="id валюты"),
-                    name: str = Body(description="Название валюты"),
-                    unit: float = Body(description="Единица")):
+                    name: str = Query(str, description="Название валюты"),
+                    unit: float = Query(float, description="Единица")):
     currency = [currency for currency in fake_currencies if currency["id"] == currency_id][0]
 
     if name:
@@ -63,9 +61,9 @@ def update_currency(currency_id: int = Path(description="id валюты"),
         return {"status": "ok", "data": fake_currencies}
 
 
-@app.delete("/currencies/{currency_id}",
-            status_code=204,
-            summary="Удаление записи валюты")
+@router.delete("/{currency_id}",
+               status_code=204,
+               summary="Удаление записи валюты")
 def delete_currency(currency_id: int = Path(description="id валюты")):
     currency = [currency for currency in fake_currencies if currency["id"] == currency_id][0]
 
