@@ -36,29 +36,30 @@ def get_currency_id(currency_id: int = Path(description="id валюты")):
              status_code=201,
              summary="Дабавление новой записи валюты")
 def add_currency(currency_id: int = Path(description="id валюты"),
-                 name: str = Query(str, description="Название валюты"),
-                 unit: float = Query(float, description="Единица")):
-    currency = [
-        {"id": currency_id, "name": name, "unit": unit}
-    ]
+                 name: str = Body(str, description="Название валюты"),
+                 unit: float = Body(float, description="Единица")):
+    currency = {"id": currency_id, "name": name, "unit": unit}
 
-    return {"status": "ok", "data": fake_currencies + currency}
+    fake_currencies.append(currency)
+
+    return {"status": "ok", "data": currency}
 
 
 @router.patch("/{currency_id}",
               status_code=200,
               summary="Изменение данные валюты")
 def update_currency(currency_id: int = Path(description="id валюты"),
-                    name: str = Query(str, description="Название валюты"),
-                    unit: float = Query(float, description="Единица")):
+                    name: str = Body(str, description="Название валюты"),
+                    unit: float = Body(float, description="Единица")):
     currency = [currency for currency in fake_currencies if currency["id"] == currency_id][0]
 
-    if name:
-        currency.name = name
-    elif unit:
-        currency.unit = unit
-    else:
-        return {"status": "ok", "data": fake_currencies}
+    if currency["name"]:
+        currency["name"] = name
+
+    if currency["unit"]:
+        currency["unit"] = unit
+
+    return {"status": "ok", "data": currency}
 
 
 @router.delete("/{currency_id}",
@@ -67,4 +68,7 @@ def update_currency(currency_id: int = Path(description="id валюты"),
 def delete_currency(currency_id: int = Path(description="id валюты")):
     currency = [currency for currency in fake_currencies if currency["id"] == currency_id][0]
 
-    return {"status": "ok", "data": fake_currencies.pop(currency['id'])}
+    fake_currencies.remove(currency)
+    # fake_currencies.pop(currency['id'])
+
+    return {"status": "ok", "data": currency['id']}
